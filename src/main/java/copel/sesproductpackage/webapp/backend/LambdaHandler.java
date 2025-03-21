@@ -26,17 +26,23 @@ import lombok.extern.slf4j.Slf4j;
 public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
-    	// (0) アクセスログ
         log.info("[Invoke ID: {}] {}", context.getAwsRequestId(), input.toString());
 
+        // (0) レスポンスを準備
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
+        response.setHeaders(Map.of(
+                "Content-Type", "application/json",
+                "Access-Control-Allow-Origin", input.getHeaders().get("origin"),
+                "Access-Control-Allow-Methods", "OPTIONS, POST, GET",
+                "Access-Control-Allow-Headers", "Content-Type, Authorization",
+                "Access-Control-Allow-Credentials", "true"
+            ));
 
         // (1) 空のリクエストの場合、処理終了
     	if (input.getBody() == null) {
     		log.error("[Invoke ID: {}] リクエストボディが空のリクエストのため、処理を行わず終了します。", context.getAwsRequestId());
             response.setStatusCode(400);
             response.setBody("{\"message\": \"リクエストボディが空です。\"}");
-            response.setHeaders(Map.of("Content-Type", "application/json"));
             return response;
     	}
 
@@ -56,7 +62,6 @@ public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent
             log.error("[Invoke ID: {}] process_typeが存在しないため、処理を終了します。", context.getAwsRequestId());
             response.setStatusCode(400);
             response.setBody("{\"message\": \"process_typeが存在しません。\"}");
-            response.setHeaders(Map.of("Content-Type", "application/json"));
             return response;
         }
 
@@ -92,7 +97,6 @@ public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent
 	            log.error("[Invoke ID: {}] process_typeが異常のため、処理を終了します。", context.getAwsRequestId());
 	            response.setStatusCode(400);
 	            response.setBody("{\"message\": \"対象外のprocess_typeが送信されました。\"}");
-	            response.setHeaders(Map.of("Content-Type", "application/json"));
 	            return response;
         }
 
@@ -100,7 +104,6 @@ public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent
         log.info("[Invoke ID: {}] 正常に処理を終了します。", context.getAwsRequestId());
         response.setStatusCode(200);
         response.setBody(responseEntity.toJson());
-        response.setHeaders(Map.of("Content-Type", "application/json"));
         return response;
     }
 }
