@@ -40,9 +40,9 @@ public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent
 
         // (1) 空のリクエストの場合、処理終了
     	if (input.getBody() == null) {
-    		log.error("[Invoke ID: {}] リクエストボディが空のリクエストのため、処理を行わず終了します。", context.getAwsRequestId());
             response.setStatusCode(400);
             response.setBody("{\"message\": \"リクエストボディが空です。\"}");
+    		log.error("[Invoke ID: {}] リクエストボディが空のリクエストのため、処理を行わず終了します。{}", context.getAwsRequestId(), response);
             return response;
     	}
 
@@ -54,14 +54,17 @@ public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent
 		try {
 			rootNode = objectMapper.readTree(input.getBody());
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
+            response.setStatusCode(400);
+            response.setBody("{\"message\": \"リクエストボディの形式が異常です。\"}");
+    		log.error("[Invoke ID: {}] リクエストボディの形式が異常のため、処理を行わず終了します。{}", context.getAwsRequestId(), response);
+            return response;
 		}
 
 		// (2-1) "process_type"が存在しない場合、400エラー
         if (!rootNode.has("process_type")) {
-            log.error("[Invoke ID: {}] process_typeが存在しないため、処理を終了します。", context.getAwsRequestId());
             response.setStatusCode(400);
             response.setBody("{\"message\": \"process_typeが存在しません。\"}");
+            log.error("[Invoke ID: {}] process_typeが存在しないため、処理を終了します。{}", context.getAwsRequestId(), response);
             return response;
         }
 
@@ -94,16 +97,16 @@ public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent
 	        case スキルシート情報検索画面_AI検索:
 	        	break;
 	        default:
-	            log.error("[Invoke ID: {}] process_typeが異常のため、処理を終了します。", context.getAwsRequestId());
 	            response.setStatusCode(400);
 	            response.setBody("{\"message\": \"対象外のprocess_typeが送信されました。\"}");
+	            log.error("[Invoke ID: {}] process_typeが異常のため、処理を終了します。{}", context.getAwsRequestId(), response);
 	            return response;
         }
 
         // (5) レスポンスを作成し返却する
-        log.info("[Invoke ID: {}] 正常に処理を終了します。", context.getAwsRequestId());
         response.setStatusCode(200);
         response.setBody(responseEntity.toJson());
+        log.info("[Invoke ID: {}] 正常に処理を終了します。{}", context.getAwsRequestId(), response);
         return response;
     }
 }
