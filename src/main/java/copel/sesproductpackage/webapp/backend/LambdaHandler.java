@@ -26,6 +26,9 @@ import lombok.extern.slf4j.Slf4j;
 public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
+    	// (0) アクセスログ
+        log.info("[Invoke ID: {}] {}", context.getAwsRequestId(), input.toString());
+
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
 
         // (1) 空のリクエストの場合、処理終了
