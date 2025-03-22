@@ -38,6 +38,14 @@ public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent
                 "Access-Control-Allow-Credentials", "true"
             ));
 
+        // (0) OPTIONSリクエストなら即レスポンス
+        if ("OPTIONS".equalsIgnoreCase(input.getHttpMethod())) {
+            response.setStatusCode(200);
+            response.setBody("{}");
+            log.info("[Invoke ID: {}] OPTIONSリクエストを受信しました。CORSヘッダーを返します。{}", context.getAwsRequestId(), response);
+            return response;
+        }
+
         // (1) 空のリクエストの場合、処理終了
     	if (input.getBody() == null) {
             response.setStatusCode(400);
