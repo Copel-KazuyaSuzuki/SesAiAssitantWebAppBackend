@@ -39,7 +39,8 @@ public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent
             ));
 
         // (0) OPTIONSリクエストなら即レスポンス
-        log.info(input.getHttpMethod());
+        log.debug(input.getHeaders().toString());
+        log.debug(input.getHttpMethod());
         if ("OPTIONS".equalsIgnoreCase(input.getHttpMethod())) {
             response.setStatusCode(200);
             response.setBody("{}");
