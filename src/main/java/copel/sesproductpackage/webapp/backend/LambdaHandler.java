@@ -39,9 +39,7 @@ public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent
             ));
 
         // (0) OPTIONSリクエストなら即レスポンス
-        log.debug(input.getHeaders().toString());
-        log.debug(input.getHttpMethod());
-        if ("OPTIONS".equalsIgnoreCase(input.getHttpMethod())) {
+        if ("OPTIONS".equalsIgnoreCase(input.getHeaders().get("access-control-request-method"))) {
             response.setStatusCode(200);
             response.setBody("{}");
             log.info("[Invoke ID: {}] OPTIONSリクエストを受信しました。CORSヘッダーを返します。{}", context.getAwsRequestId(), response);
